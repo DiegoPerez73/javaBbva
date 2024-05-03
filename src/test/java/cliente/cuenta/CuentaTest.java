@@ -3,6 +3,8 @@ package cliente.cuenta;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,22 @@ public class CuentaTest {
 		this.saldo = 20.0;
 		cuenta = new Cuenta(saldo);
 
+	}
+
+	@Test
+	void constructorCuentaPositivo() throws ExcepcionMontoInvalido {
+		Cuenta c = new Cuenta(100.0);
+		assertEquals(100, c.saldo());
+	}
+
+	@Test
+	void constructorCuentaNegativo() throws ExcepcionMontoInvalido {
+		assertThrows(ExcepcionMontoInvalido.class, () -> new Cuenta(-100.0));
+	}
+
+	@Test
+	void constructorCuentaValor0() throws ExcepcionMontoInvalido {
+		assertThrows(ExcepcionMontoInvalido.class, () -> new Cuenta(0));
 	}
 
 	@Test
@@ -56,29 +74,29 @@ public class CuentaTest {
 
 	@Test
 	void depositarError() throws ExcepcionMontoInvalido {
-		double montoDepositado = -10.0;
-		assertThrows(ExcepcionMontoInvalido.class, () -> cuenta.depositar(montoDepositado));
+		double montoNegativo = -10.0;
+		assertThrows(ExcepcionMontoInvalido.class, () -> cuenta.depositar(montoNegativo));
 	}
 
 	@Test
 	void extraerExitoso() throws ExcepcionMontoInvalido, ExcepcionSaldoInsuficiente {
 		double saldoInicial = cuenta.saldo();
-		double montoExtraido = 10.0;
-		cuenta.extraer(montoExtraido);
-		assertEquals(saldoInicial - montoExtraido, cuenta.saldo());
-		assertDoesNotThrow(() -> cuenta.depositar(montoExtraido));
+		double montoPositivo = 10.0;
+		cuenta.extraer(montoPositivo);
+		assertEquals(saldoInicial - montoPositivo, cuenta.saldo());
+		assertDoesNotThrow(() -> cuenta.depositar(montoPositivo));
 	}
 
 	@Test
 	void extraerErrorMonto() throws ExcepcionMontoInvalido {
-		double montoExtraido = -10.0;
-		assertThrows(ExcepcionMontoInvalido.class, () -> cuenta.extraer(montoExtraido));
+		double montoNegativo = -10.0;
+		assertThrows(ExcepcionMontoInvalido.class, () -> cuenta.extraer(montoNegativo));
 	}
 
 	@Test
 	void extraerErrorSaldoInsuf() throws ExcepcionSaldoInsuficiente {
-		double montoExtraido = 30.0;
-		assertThrows(ExcepcionSaldoInsuficiente.class, () -> cuenta.extraer(montoExtraido));
+		double montoPositivo = 30.0;
+		assertThrows(ExcepcionSaldoInsuficiente.class, () -> cuenta.extraer(montoPositivo));
 	}
 
 	@Test
@@ -89,29 +107,66 @@ public class CuentaTest {
 		// Cuenta origen
 		double saldoOrigen = cuenta.saldo();
 		// Monto transferido
-		double montoTransferido = 10.0;
+		double montoTransferidoPositivo = 10.0;
 
-		cuenta.transferir(montoTransferido, cuentaDestino);
+		cuenta.transferir(montoTransferidoPositivo, cuentaDestino);
 
-		assertEquals(saldoOrigen - montoTransferido, cuenta.saldo());
-		assertEquals(saldoCuentaDestino + montoTransferido, cuentaDestino.saldo());
+		assertEquals(saldoOrigen - montoTransferidoPositivo, cuenta.saldo());
+		assertEquals(saldoCuentaDestino + montoTransferidoPositivo, cuentaDestino.saldo());
 	}
-	
+
 	@Test
 	void transferirErrorMonto() throws ExcepcionMontoInvalido, ExcepcionSaldoInsuficiente {
 		Cuenta cuentaDestino = new Cuenta(5.0);
 
 		double MontoMenorA0 = -10.0;
-		
+
 		double montoMayorASaldo = 25.0;
-		
+
 		assertThrows(ExcepcionMontoInvalido.class, () -> cuenta.transferir(MontoMenorA0, cuentaDestino));
 		assertThrows(ExcepcionSaldoInsuficiente.class, () -> cuenta.transferir(montoMayorASaldo, cuentaDestino));
 	}
-	
+
 	@Test
 	void toStringExitoso() throws ExcepcionMontoInvalido {
-		assertEquals("Cuenta [saldo=20.0, fechaApertura =" + cuenta.getFechaApertura() + "]", cuenta.toString());
+		assertEquals("Cuenta [saldo=" + cuenta.saldo() + ", fechaApertura =" + cuenta.getFechaApertura() + "]",
+				cuenta.toString());
 	}
 
+	@Test
+	void compareToMayorA0() throws ExcepcionMontoInvalido {
+		Cuenta cuentaA = new Cuenta(300.0);
+		Cuenta cuentaB = new Cuenta(100.0);
+		assertTrue(cuentaA.compareTo(cuentaB) > 0);
+		assertTrue(cuentaB.compareTo(cuentaA) < 0);
+	}
+
+	@Test
+	void compareToMenorA0() throws ExcepcionMontoInvalido {
+		Cuenta cuentaA = new Cuenta(300.0);
+		Cuenta cuentaB = new Cuenta(400.0);
+		assertTrue(cuentaA.compareTo(cuentaB) < 0);
+	}
+
+	@Test
+	void compareToIgualA0() throws ExcepcionMontoInvalido {
+		Cuenta cuentaA = new Cuenta(300.0);
+		Cuenta cuentaB = new Cuenta(300.0);
+		assertTrue(cuentaA.compareTo(cuentaB) == 0);
+	}
+	
+	@Test
+	void CuentaAMayor() throws ExcepcionMontoInvalido {
+		Cuenta cuentaA = new Cuenta(300.0);
+		Cuenta cuentaB = new Cuenta(200.0);
+		assertEquals(cuentaA, Cuenta.mayor(cuentaA, cuentaB));
+	}
+	
+	@Test
+	void CuentaBMayor() throws ExcepcionMontoInvalido {
+		Cuenta cuentaA = new Cuenta(300.0);
+		Cuenta cuentaB = new Cuenta(400.0);
+		assertEquals(cuentaB, Cuenta.mayor(cuentaA, cuentaB));
+	}
+	
 }

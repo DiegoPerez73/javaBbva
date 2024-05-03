@@ -16,53 +16,52 @@ public class Cuenta implements Comparable<Cuenta> {
 		return Double.valueOf(saldo).compareTo(o.saldo());
 	}
 
-	public static <S extends Comparable<S>> 
-	S mayor(S a, S b){
-		if (a.compareTo(b) > 0) return a;
+	// Si la cuenta pasada por parametro es menor, devuelve un valor < a 0, igual
+	// devuelve 0, mayor devuelve > 0
+	public static <S extends Comparable<S>> S mayor(S a, S b) {
+		if (a.compareTo(b) > 0)
+			return a;
 		else
 			return b;
 	}
 
-	public double saldo(){	
+	public double saldo() {
 		return saldo;
 	}
 
-	public void  validar(double monto) throws ExcepcionMontoInvalido {
+	public void validar(double monto) throws ExcepcionMontoInvalido {
 		if (monto <= 0)
-			throw new ExcepcionMontoInvalido();		
+			throw new ExcepcionMontoInvalido();
 	}
 
-	public void depositar(double monto) throws ExcepcionMontoInvalido{
+	public void depositar(double monto) throws ExcepcionMontoInvalido {
 		validar(monto);
-		saldo+=monto;
+		saldo += monto;
 	}
 
-	public void extraer(double monto) throws ExcepcionSaldoInsuficiente, ExcepcionMontoInvalido{
+	public void extraer(double monto) throws ExcepcionSaldoInsuficiente, ExcepcionMontoInvalido {
 		validar(monto);
-		if(disponible() < monto)
+		if (disponible() < monto)
 			throw new ExcepcionSaldoInsuficiente();
 
-		saldo-=monto;
+		saldo -= monto;
 	}
 
 	protected double disponible() {
 		return saldo();
 	}
 
-
 	public void transferir(double monto, Cuenta destino) throws ExcepcionSaldoInsuficiente, ExcepcionMontoInvalido {
-		extraer(monto); 
+		extraer(monto);
 		destino.depositar(monto);
 	}
 
 	public String toString() {
-		return "Cuenta [saldo=" + saldo + ", fechaApertura =" + fechaApertura +"]";
+		return "Cuenta [saldo=" + saldo + ", fechaApertura =" + fechaApertura + "]";
 	}
-	
+
 	public LocalDate getFechaApertura() {
 		return this.fechaApertura;
 	}
 
 }
-
-
